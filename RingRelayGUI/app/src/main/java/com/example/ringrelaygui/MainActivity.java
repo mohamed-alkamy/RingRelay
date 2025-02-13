@@ -29,25 +29,30 @@ public class MainActivity extends AppCompatActivity {
         Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        // DEBUG LOG
-        Log.d("DEBUG", "Toggling fragment: " + tag);
-
+        // Get reference to the home layout
         View homeLayout = findViewById(R.id.homeLayout);
 
+        // Set animations based on the direction
+        switch (tag) {
+            case "LEFT":
+                transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left);
+                break;
+            case "BOTTOM":
+                transaction.setCustomAnimations(R.anim.slide_in_bottom, R.anim.slide_out_bottom);
+                break;
+            case "RIGHT":
+                transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right);
+                break;
+        }
+
         if (existingFragment != null && existingFragment.isVisible()) {
-            // DEBUG LOG
-            Log.d("DEBUG", "Fragment is visible, removing it...");
-
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);  // Temporary fade effect
+            // If the fragment is already visible, remove it and show the home UI again
             transaction.remove(existingFragment);
-            homeLayout.setVisibility(View.VISIBLE);  // Show home screen again
+            homeLayout.setVisibility(View.VISIBLE); // Show home screen
         } else {
-            // DEBUG LOG
-            Log.d("DEBUG", "Fragment is not visible, adding it...");
-
-            transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);  // Temporary fade effect
+            // Otherwise, replace with the new fragment and hide the home screen UI
             transaction.replace(R.id.fragment_container, fragment, tag);
-            homeLayout.setVisibility(View.GONE);  // Hide home UI when switching
+            homeLayout.setVisibility(View.GONE); // Hide home screen
         }
 
         transaction.commit();
