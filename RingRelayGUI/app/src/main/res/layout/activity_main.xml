@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#E0E0E0">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/homeLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HomeScreen"
+        android:textSize="12sp"
+        android:textColor="#AAAAAA"
+        android:layout_margin="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="80dp"/>
+
+
+    <!-- Central Circle -->
+    <View
+        android:id="@+id/centralCircle"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="@drawable/circle_shape"
+        android:layout_centerInParent="true" />
+
+    <TextView
+        android:id="@+id/timeDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="8:00pm"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:layout_centerInParent="true" />
+
+    <!-- Bottom Navigation Buttons -->
+    <LinearLayout
+        android:id="@+id/bottomNav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_marginBottom="20dp">
+
+        <Button
+            android:id="@+id/statisticsButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/circle_button"
+            android:layout_margin="10dp" />
+
+        <Button
+            android:id="@+id/alarmsButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/circle_button"
+            android:layout_margin="10dp" />
+
+        <Button
+            android:id="@+id/settingsButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/circle_button"
+            android:layout_margin="10dp" />
+    </LinearLayout>
+</RelativeLayout>
