@@ -1,14 +1,29 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF5733"> <!-- Orange background for testing -->
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
+        android:id="@+id/statisticsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Statistics Page"
+        android:text="Statistics"
         android:textSize="24sp"
-        android:textColor="#FFFFFF"
-        android:layout_centerInParent="true"/>
-</RelativeLayout>
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/statisticsSummary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Average: 0 | Max: 0 | Min: 0"
+        android:textSize="16sp"
+        android:paddingTop="8dp"/>
+
+    <Button
+        android:id="@+id/updateStatsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Update Data"/>
+</LinearLayout>

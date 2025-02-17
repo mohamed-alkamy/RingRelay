@@ -1,13 +1,27 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#4CAF50"> <!-- Green background -->
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
+        android:id="@+id/settingsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings Page"
+        android:text="Settings"
         android:textSize="24sp"
-        android:textColor="#FFFFFF"
-        android:layout_centerInParent="true"/>
-</RelativeLayout>
+        android:textStyle="bold"/>
+
+    <Switch
+        android:id="@+id/darkModeSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enable Dark Mode"/>
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reset Data"/>
+</LinearLayout>
