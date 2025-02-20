@@ -34,7 +34,6 @@ public class AlarmsFragment extends Fragment {
         hourSpinner = view.findViewById(R.id.hourSpinner);
         minuteSpinner = view.findViewById(R.id.minuteSpinner);
         amPmSpinner = view.findViewById(R.id.amPmSpinner);
-        saveAlarmSwitch = view.findViewById(R.id.saveAlarmSwitch);
         setAlarmButton = view.findViewById(R.id.setAlarmButton);
         savedAlarmsList = view.findViewById(R.id.savedAlarmsList);
 
@@ -48,10 +47,8 @@ public class AlarmsFragment extends Fragment {
         // Set Alarm Button Click
         setAlarmButton.setOnClickListener(v -> {
             String alarmTime = getSelectedTime();
-            if (saveAlarmSwitch.isChecked()) {
-                savedAlarms.add(new AlarmItem(alarmTime, true)); // Default to enabled
-                adapter.notifyDataSetChanged();
-            }
+            savedAlarms.add(new AlarmItem(alarmTime, true)); // Default to enabled
+            adapter.notifyDataSetChanged();
             Toast.makeText(getActivity(), "Alarm Set: " + alarmTime, Toast.LENGTH_SHORT).show();
         });
 

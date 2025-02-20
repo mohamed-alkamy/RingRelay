@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -5,75 +6,99 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/alarmsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Set an Alarm"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_gravity="center_horizontal"/>
-
-    <!-- Dropdowns for Hour, Minute, AM/PM -->
+    <!-- Alarm Setting Section (Takes Most of the Screen) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <Spinner
-            android:id="@+id/hourSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        android:layout_weight="1"
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" : "
-            android:textSize="20sp"
-            android:padding="8dp"/>
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="8dp"
+            android:text="Set New Alarm"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-        <Spinner
-            android:id="@+id/minuteSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <!-- Dropdowns for Time Selection -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
 
-        <Spinner
-            android:id="@+id/amPmSpinner"
+            <Spinner
+                android:id="@+id/hourSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text=":"
+                android:textSize="18sp" />
+
+            <Spinner
+                android:id="@+id/minuteSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <Spinner
+                android:id="@+id/amPmSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Save Alarm Toggle -->
+        <Switch
+            android:id="@+id/saveAlarmSwitch"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Save Alarm" />
+
+        <!-- Set Alarm Button -->
+        <Button
+            android:id="@+id/setAlarmButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Set Alarm" />
     </LinearLayout>
 
-    <!-- Toggle for saving alarm -->
-    <Switch
-        android:id="@+id/saveAlarmSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save Alarm for Quick Access"/>
-
-    <!-- Button to Set Alarm -->
-    <Button
-        android:id="@+id/setAlarmButton"
+    <!-- Saved Alarms Section (Fixed Height at the Bottom) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Set Alarm"
-        android:layout_marginTop="10dp"/>
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:background="@color/cardview_shadow_start_color"
+        android:orientation="vertical"
+        android:padding="8dp">
 
-    <TextView
-        android:id="@+id/savedAlarmsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Saved Alarms"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="4dp"
+            android:text="Saved Alarms"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-    <!-- List of previously saved alarms -->
-    <ListView
-        android:id="@+id/savedAlarmsList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"/>
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ListView
+                android:id="@+id/savedAlarmsList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical" />
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
 </LinearLayout>
