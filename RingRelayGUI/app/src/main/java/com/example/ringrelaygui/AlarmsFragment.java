@@ -2,26 +2,26 @@ package com.example.ringrelaygui;
 
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
 public class AlarmsFragment extends Fragment {
     private Spinner hourSpinner, minuteSpinner, amPmSpinner;
-    private Switch saveAlarmSwitch;
     private Button setAlarmButton;
-    private ListView savedAlarmsList;
+    private RecyclerView savedAlarmsRecyclerView;
     private ArrayList<AlarmItem> savedAlarms = new ArrayList<>();
     private AlarmAdapter adapter;
 
@@ -35,27 +35,27 @@ public class AlarmsFragment extends Fragment {
         minuteSpinner = view.findViewById(R.id.minuteSpinner);
         amPmSpinner = view.findViewById(R.id.amPmSpinner);
         setAlarmButton = view.findViewById(R.id.setAlarmButton);
-        savedAlarmsList = view.findViewById(R.id.savedAlarmsList);
+        savedAlarmsRecyclerView = view.findViewById(R.id.savedAlarmsRecyclerView);
 
-        // Populate Spinners
+        // Setup Spinners
         setupSpinners();
 
-        // Setup ListView Adapter
-        adapter = new AlarmAdapter(requireContext(), savedAlarms);
-        savedAlarmsList.setAdapter(adapter);
+        // Setup RecyclerView
+        savedAlarmsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new AlarmAdapter(savedAlarms);
+        savedAlarmsRecyclerView.setAdapter(adapter);
 
         // Set Alarm Button Click
         setAlarmButton.setOnClickListener(v -> {
             String alarmTime = getSelectedTime();
             savedAlarms.add(new AlarmItem(alarmTime, true)); // Default to enabled
-            adapter.notifyDataSetChanged();
+            adapter.notifyItemInserted(savedAlarms.size() - 1);
             Toast.makeText(getActivity(), "Alarm Set: " + alarmTime, Toast.LENGTH_SHORT).show();
         });
 
         return view;
     }
 
-    // Setup dropdowns with values
     private void setupSpinners() {
         ArrayAdapter<String> hourAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, getHours());
         hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -92,4 +92,3 @@ public class AlarmsFragment extends Fragment {
                 amPmSpinner.getSelectedItem().toString();
     }
 }
-
