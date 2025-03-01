@@ -69,6 +69,13 @@ public class AlarmsFragment extends Fragment {
         });
     }
 
+    public void removeAlarmFromList(int position) {
+        requireActivity().runOnUiThread(() -> {
+            savedAlarms.remove(position);
+            adapter.notifyDataSetChanged();
+        });
+    }
+
 
 
 
