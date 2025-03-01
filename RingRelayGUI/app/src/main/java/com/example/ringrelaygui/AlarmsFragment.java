@@ -2,32 +2,29 @@ package com.example.ringrelaygui;
 
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
+import android.os.AsyncTask;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AlarmsFragment extends Fragment {
     private Spinner hourSpinner, minuteSpinner, amPmSpinner;
     private Button setAlarmButton;
-    private RecyclerView savedAlarmsRecyclerView;
-    private ArrayList<AlarmItem> savedAlarms = new ArrayList<>();
-    private AlarmAdapter adapter;
+    private ListView savedAlarmsList;
+    private ArrayList<AlarmEntity> savedAlarms = new ArrayList<>();
 
-    @Nullable
+    private AlarmAdapter adapter;
+    private AlarmDatabase alarmDatabase;
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_alarms, container, false);
 
         // Initialize UI elements
@@ -35,27 +32,60 @@ public class AlarmsFragment extends Fragment {
         minuteSpinner = view.findViewById(R.id.minuteSpinner);
         amPmSpinner = view.findViewById(R.id.amPmSpinner);
         setAlarmButton = view.findViewById(R.id.setAlarmButton);
-        savedAlarmsRecyclerView = view.findViewById(R.id.savedAlarmsRecyclerView);
+        savedAlarmsList = view.findViewById(R.id.savedAlarmsList);
+
+        // Initialize Room Database
+        alarmDatabase = AlarmDatabase.getInstance(requireContext());
+
+        adapter = new AlarmAdapter(requireContext(), savedAlarms);
+        savedAlarmsList.setAdapter(adapter);
 
         // Setup Spinners
         setupSpinners();
 
-        // Setup RecyclerView
-        savedAlarmsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new AlarmAdapter(savedAlarms);
-        savedAlarmsRecyclerView.setAdapter(adapter);
+        // Load saved alarms from the database
+        loadSavedAlarms();
 
         // Set Alarm Button Click
         setAlarmButton.setOnClickListener(v -> {
             String alarmTime = getSelectedTime();
-            savedAlarms.add(new AlarmItem(alarmTime, true)); // Default to enabled
-            adapter.notifyItemInserted(savedAlarms.size() - 1);
-            Toast.makeText(getActivity(), "Alarm Set: " + alarmTime, Toast.LENGTH_SHORT).show();
+            AlarmEntity newAlarm = new AlarmEntity(alarmTime, true);
+            saveAlarm(newAlarm);
         });
 
         return view;
     }
 
+    // Load alarms from database asynchronously
+    private void loadSavedAlarms() {
+        AsyncTask.execute(() -> {
+            List<AlarmEntity> alarms = alarmDatabase.alarmDao().getAllAlarms();
+
+            requireActivity().runOnUiThread(() -> {
+                savedAlarms.clear();
+                savedAlarms.addAll(alarms);  // No need to convert types anymore!
+                adapter.notifyDataSetChanged();
+            });
+        });
+    }
+
+
+
+
+    // Save alarm to database
+    private void saveAlarm(AlarmEntity alarm) {
+        AsyncTask.execute(() -> {
+            alarmDatabase.alarmDao().insert(alarm);
+            requireActivity().runOnUiThread(() -> {
+                savedAlarms.add(alarm);
+                adapter.notifyDataSetChanged();
+                Toast.makeText(getActivity(), "Alarm Saved: " + alarm.getTime(), Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
+
+    // Setup dropdowns
     private void setupSpinners() {
         ArrayAdapter<String> hourAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, getHours());
         hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
