@@ -1,5 +1,6 @@
 package com.example.ringrelaygui;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,6 +8,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import android.util.Log;
+import android.widget.TextView;
+
+import java.util.Calendar;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -68,4 +73,20 @@ public class MainActivity extends AppCompatActivity {
             fragmentManager.beginTransaction().remove(fragment).commit();
         }
     }
+
+    // Helper function to convert "HH:MM AM/PM" to total minutes
+    private int convertToMinutes(String time) {
+        String[] parts = time.split(" ");
+        String[] hm = parts[0].split(":");
+        int hour = Integer.parseInt(hm[0]);
+        int minute = Integer.parseInt(hm[1]);
+        boolean isPM = parts[1].equals("PM");
+
+        if (hour == 12) hour = 0; // 12 AM -> 0, 12 PM -> 12
+        if (isPM) hour += 12;
+
+        return hour * 60 + minute;
+    }
+
+
 }
