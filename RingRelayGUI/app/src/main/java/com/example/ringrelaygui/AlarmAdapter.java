@@ -35,6 +35,11 @@ public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
             alarmTime.setText(alarm.getTime());
             alarmSwitch.setChecked(alarm.isEnabled());
 
+            alarmSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                alarm.setEnabled(isChecked); // Update object
+                updateAlarmInDatabase(alarm); // Save change to DB
+            });
+
             // Handle Delete Button Click
             alarmDelete.setOnClickListener(v -> deleteAlarm(position, alarm));
         }
@@ -46,6 +51,12 @@ public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
         AsyncTask.execute(() -> {
             alarmDatabase.alarmDao().delete(alarm);
             ((AlarmsFragment) ((MainActivity) getContext()).getSupportFragmentManager().findFragmentById(R.id.fragment_container)).removeAlarmFromList(position);
+        });
+    }
+
+    private void updateAlarmInDatabase(AlarmEntity alarm) {
+        AsyncTask.execute(() -> {
+            alarmDatabase.alarmDao().update(alarm);
         });
     }
 }
