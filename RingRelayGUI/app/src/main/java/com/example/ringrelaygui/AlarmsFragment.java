@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.os.AsyncTask;
 import java.util.ArrayList;
@@ -18,21 +19,20 @@ import java.util.Collections;
 import java.util.List;
 
 public class AlarmsFragment extends Fragment {
-    private Spinner hourSpinner, minuteSpinner, amPmSpinner;
+
     private Button setAlarmButton;
     private ListView savedAlarmsList;
     private ArrayList<AlarmEntity> savedAlarms = new ArrayList<>();
     private AlarmAdapter adapter;
     private AlarmDatabase alarmDatabase;
+    private TimePicker timePicker;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_alarms, container, false);
 
         // Initialize UI elements
-        hourSpinner = view.findViewById(R.id.hourSpinner);
-        minuteSpinner = view.findViewById(R.id.minuteSpinner);
-        amPmSpinner = view.findViewById(R.id.amPmSpinner);
+        timePicker = view.findViewById(R.id.timePicker);
         setAlarmButton = view.findViewById(R.id.setAlarmButton);
         savedAlarmsList = view.findViewById(R.id.savedAlarmsList);
 
@@ -41,9 +41,6 @@ public class AlarmsFragment extends Fragment {
 
         adapter = new AlarmAdapter(requireContext(), savedAlarms);
         savedAlarmsList.setAdapter(adapter);
-
-        // Setup Spinners
-        setupSpinners();
 
         // Load saved alarms from the database
         loadSavedAlarms();
@@ -58,40 +55,30 @@ public class AlarmsFragment extends Fragment {
         return view;
     }
 
-    // Setup dropdowns
-    private void setupSpinners() {
-        ArrayAdapter<String> hourAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, getHours());
-        hourAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        hourSpinner.setAdapter(hourAdapter);
 
-        ArrayAdapter<String> minuteAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, getMinutes());
-        minuteAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        minuteSpinner.setAdapter(minuteAdapter);
-
-        ArrayAdapter<String> amPmAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, new String[]{"AM", "PM"});
-        amPmAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        amPmSpinner.setAdapter(amPmAdapter);
-    }
-    private String[] getHours() {
-        String[] hours = new String[12];
-        for (int i = 0; i < 12; i++) {
-            hours[i] = String.valueOf(i + 1);
-        }
-        return hours;
-    }
-    private String[] getMinutes() {
-        String[] minutes = new String[60];
-        for (int i = 0; i < 60; i++) {
-            minutes[i] = String.format("%02d", i);
-        }
-        return minutes;
-    }
     private String getSelectedTime() {
-        return hourSpinner.getSelectedItem().toString() + ":" +
-                minuteSpinner.getSelectedItem().toString() + " " +
-                amPmSpinner.getSelectedItem().toString();
+        int hour = timePicker.getHour();
+        int minute = timePicker.getMinute();
+
+        // Determine AM/PM
+        String amPm = (hour >= 12) ? "PM" : "AM";
+
+        // Convert the hour to a 12-hour format
+        if (hour > 12) {
+            hour -= 12;
+        } else if (hour == 0) {
+            hour = 12; // Handle midnight case
+        }
+
+        String time = hour + ":" + String.format("%02d", minute) + " " + amPm;
+
+        // Log the time to Logcat
+        Log.d("TimePicker", "Selected time: " + time);
+        int longTime = convertTo24Hour(time);
+        Log.d("TimePicker", "24 hour variant: " + longTime);
+
+        return time;
     }
-    // Load alarms from database asynchronously
 
     private void saveAlarm(AlarmEntity alarm) {
         AsyncTask.execute(() -> {
@@ -99,6 +86,7 @@ public class AlarmsFragment extends Fragment {
             requireActivity().runOnUiThread(() -> {
                 savedAlarms.add(alarm);
                 adapter.notifyDataSetChanged();
+                loadSavedAlarms();
                 Toast.makeText(getActivity(), "Alarm Saved: " + alarm.getTime(), Toast.LENGTH_SHORT).show();
             });
         });

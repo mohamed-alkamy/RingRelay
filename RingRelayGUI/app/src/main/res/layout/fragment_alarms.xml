@@ -32,42 +32,29 @@
             android:gravity="center_horizontal"
             android:orientation="horizontal">
 
-            <Spinner
-                android:id="@+id/hourSpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp" />
-
-            <TextView
+            <TimePicker
+                android:id="@+id/timePicker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                android:text=":"
-                android:textSize="18sp" />
+                android:timePickerMode="spinner"
+                android:layout_gravity="center" />
 
-            <Spinner
-                android:id="@+id/minuteSpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp" />
-
-            <Spinner
-                android:id="@+id/amPmSpinner"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp" />
         </LinearLayout>
-
         <Button
             android:id="@+id/setAlarmButton"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_marginTop="8dp"
             android:backgroundTint="#15485B"
             android:text="Set Alarm" />
+
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_weight="1"
         android:background="#CECECE"
