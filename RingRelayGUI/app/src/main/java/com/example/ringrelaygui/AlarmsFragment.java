@@ -1,5 +1,9 @@
 package com.example.ringrelaygui;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 
@@ -15,6 +19,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import android.os.AsyncTask;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -50,6 +55,7 @@ public class AlarmsFragment extends Fragment {
             String alarmTime = getSelectedTime();
             AlarmEntity newAlarm = new AlarmEntity(alarmTime, true);
             saveAlarm(newAlarm);
+            scheduleSystemAlarm(requireContext(),newAlarm);
         });
 
         return view;
@@ -135,7 +141,7 @@ public class AlarmsFragment extends Fragment {
 
     public void toggleAlarm(AlarmEntity alarm, boolean isEnabled) {
         if (isEnabled) {
-            scheduleSystemAlarm(alarm);
+            scheduleSystemAlarm(requireContext(), alarm);
         } else {
             cancelSystemAlarm(alarm);
         }
@@ -147,18 +153,72 @@ public class AlarmsFragment extends Fragment {
         });
     }
 
-    private void scheduleSystemAlarm(AlarmEntity alarm) {
-        return;
+    private void scheduleSystemAlarm(Context context, AlarmEntity alarm) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        if (alarmManager == null) {
+            Log.e("AlarmManager", "AlarmManager is null");
+            return;
+        }
+
+        // Check if the app can schedule exact alarms
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (!alarmManager.canScheduleExactAlarms()) {
+                // Prompt the user to grant permission
+                Intent intent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                context.startActivity(intent);
+                return; // Exit early to avoid the security exception
+            }
+        }
+
+        // Calculate the trigger time
+        Calendar calendar = Calendar.getInstance();
+        String[] parts = alarm.getTime().split(" ");
+        String[] timeParts = parts[0].split(":");
+
+        int hour = Integer.parseInt(timeParts[0]);
+        int minute = Integer.parseInt(timeParts[1]);
+        boolean isPM = parts[1].equalsIgnoreCase("PM");
+
+        if (isPM && hour != 12) {
+            hour += 12;
+        } else if (!isPM && hour == 12) {
+            hour = 0;
+        }
+
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        if (calendar.getTimeInMillis() < System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        long triggerTime = calendar.getTimeInMillis();
+
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        intent.putExtra("alarmTime", alarm.getTime());
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                alarm.getId(),
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        try {
+            // Schedule the alarm
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            Log.d("AlarmManager", "Alarm scheduled at: " + triggerTime);
+        } catch (SecurityException e) {
+            Log.e("AlarmManager", "SecurityException: Unable to schedule exact alarm", e);
+        }
     }
+
+
     private void cancelSystemAlarm(AlarmEntity alarm) {
         return;
     }
-
-
-
-    // Save alarm to database
-
-
-
 
 }
