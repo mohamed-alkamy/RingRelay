@@ -3,7 +3,7 @@ package com.example.ringrelaygui;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "alarms")  // ✅ Table name must match exactly in DAO
+@Entity(tableName = "alarms")
 public class AlarmEntity {
     @PrimaryKey(autoGenerate = true)
     public int id;
@@ -15,7 +15,6 @@ public class AlarmEntity {
         this.isEnabled = isEnabled;
     }
 
-    // ✅ Getters & Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -24,6 +23,8 @@ public class AlarmEntity {
 
     public boolean isEnabled() { return isEnabled; }
     public void setEnabled(boolean enabled) { isEnabled = enabled; }
+
+
 }
 
 
