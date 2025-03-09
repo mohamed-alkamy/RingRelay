@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E0E0E0">
+    android:background="#E0E0E0"
+    android:backgroundTint="#BCBEC3">
 
     <!-- Title -->
 
@@ -13,17 +14,24 @@
         android:id="@+id/centralCircle"
         android:layout_width="250dp"
         android:layout_height="250dp"
-        android:background="@drawable/circle_shape"
-        android:layout_centerInParent="true" />
+        android:layout_centerInParent="true"
+        android:background="@drawable/circle_shape" />
+
+    <Button
+        android:id="@+id/centralButton"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:layout_centerInParent="true"
+        android:backgroundTint="#15485B" />
 
     <TextView
-        android:id="@+id/nextAlarmText"
+        android:id="@+id/mainTextDisplay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:text="RINGRELAY"
-        android:textSize="24sp"
-        android:textColor="#000000"
-        android:layout_centerInParent="true" />
+        android:textColor="#FFFFFF"
+        android:textSize="32dp" />
 
 
     <!-- Bottom Navigation Buttons -->
@@ -40,7 +48,6 @@
             android:text="Home Page"
             android:textColor="#FFFFFF"
             android:textSize="12sp" />
-
     </FrameLayout>
 
     <LinearLayout
@@ -49,8 +56,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:orientation="horizontal"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/statisticsButton"
