@@ -1,32 +1,55 @@
 package com.example.ringrelaygui;
 
-import android.os.AsyncTask;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.Calendar;
-import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private boolean isStatisticsVisible = false;
     private boolean isAlarmsVisible = false;
     private boolean isSettingsVisible = false;
+    private Button centralButton;
+    private TextView mainTextDisplay;
+    private boolean isAlarmRinging = false;
+
+    private CountDownTimer countDownTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        centralButton = findViewById(R.id.centralButton);
+        mainTextDisplay = findViewById(R.id.mainTextDisplay);
+
+        // Register broadcast receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(widgetReceiver, new IntentFilter("UPDATE_WIDGET_TEXT"));
+
         findViewById(R.id.statisticsButton).setOnClickListener(v -> toggleFragment(new StatisticsFragment(), "LEFT"));
         findViewById(R.id.alarmsButton).setOnClickListener(v -> toggleFragment(new AlarmsFragment(), "BOTTOM"));
         findViewById(R.id.settingsButton).setOnClickListener(v -> toggleFragment(new SettingsFragment(), "RIGHT"));
+
+        centralButton.setOnClickListener(v -> {
+            if (isAlarmRinging) {
+                stopAlarmAndStartRelay();
+            }
+        });
     }
 
     private void toggleFragment(Fragment fragment, String tag) {
@@ -51,11 +74,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (existingFragment != null && existingFragment.isVisible()) {
-            // If the fragment is already visible, remove it and show the home UI again
             transaction.remove(existingFragment);
             homeLayout.setVisibility(View.VISIBLE); // Show home screen
         } else {
-            // Otherwise, replace with the new fragment and hide the home screen UI
             transaction.replace(R.id.fragment_container, fragment, tag);
             homeLayout.setVisibility(View.GONE); // Hide home screen
         }
@@ -63,30 +84,60 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
+    private final BroadcastReceiver widgetReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String newText = intent.getStringExtra("newText");
+            Log.d("AlarmDebug", "Broadcast received: " + newText);
+            if (newText != null) {
+                mainTextDisplay.setText(newText);
+                isAlarmRinging = true; // Mark that alarm is ringing
+            }
+        }
+    };
+
+    private void stopAlarmAndStartRelay() {
+        Log.d("AlarmDebug", "Stopping alarm and starting relay countdown");
+
+        // Stop the alarm service
+        Intent stopIntent = new Intent(this, AlarmService.class);
+        stopService(stopIntent);
+
+        // Ensure the alarm stops
+        AlarmService.stopAlarm();
+
+        // Reset alarm state
+        isAlarmRinging = false;
+
+        // Start 5-minute countdown
+        startRelayCountdown();
+    }
 
 
-    private void handleVisibility(boolean isVisible, Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if (isVisible) {
-            fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
-        } else {
-            fragmentManager.beginTransaction().remove(fragment).commit();
+    private void startRelayCountdown() {
+        countDownTimer = new CountDownTimer(300000, 1000) { // 5 minutes
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long minutes = millisUntilFinished / 60000;
+                long seconds = (millisUntilFinished % 60000) / 1000;
+                mainTextDisplay.setText(String.format(Locale.getDefault(), "%d:%02d", minutes, seconds));
+            }
+
+            @Override
+            public void onFinish() {
+                mainTextDisplay.setText("Start Relay!"); // Reset after timer finishes
+                //restartAlarmAfterSnooze(this);
+            }
+        }.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(widgetReceiver);
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
         }
     }
-
-    // Helper function to convert "HH:MM AM/PM" to total minutes
-    private int convertToMinutes(String time) {
-        String[] parts = time.split(" ");
-        String[] hm = parts[0].split(":");
-        int hour = Integer.parseInt(hm[0]);
-        int minute = Integer.parseInt(hm[1]);
-        boolean isPM = parts[1].equals("PM");
-
-        if (hour == 12) hour = 0; // 12 AM -> 0, 12 PM -> 12
-        if (isPM) hour += 12;
-
-        return hour * 60 + minute;
-    }
-
 
 }
