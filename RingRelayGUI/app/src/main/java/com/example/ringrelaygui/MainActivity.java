@@ -1,5 +1,7 @@
 package com.example.ringrelaygui;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -125,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                mainTextDisplay.setText("Start Relay!"); // Reset after timer finishes
-                //restartAlarmAfterSnooze(this);
+                mainTextDisplay.setText("RELAY FAILED!"); // Reset after timer finishes
+                restartAlarmAfterSnooze();
             }
         }.start();
     }
@@ -140,4 +142,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void restartAlarmAfterSnooze() {
+        Log.d("AlarmDebug", "Restarting alarm after snooze");
+
+        // Start alarm sound immediately
+        Intent serviceIntent = new Intent(this, AlarmService.class);
+        startService(serviceIntent);
+
+        // Create an intent for the AlarmReceiver
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        // Set up the AlarmManager
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        if (alarmManager != null) {
+            long triggerTime = System.currentTimeMillis() + 1000; // Backup trigger after 1s
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+        }
+    }
 }
