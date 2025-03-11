@@ -34,6 +34,7 @@
         android:textSize="32dp" />
 
 
+
     <!-- Bottom Navigation Buttons -->
 
     <FrameLayout
@@ -48,6 +49,18 @@
             android:text="Home Page"
             android:textColor="#FFFFFF"
             android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/stepCountDisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="25dp"
+            android:text=""
+            android:textColor="@android:color/black"
+            android:textSize="25sp" />
+
+
     </FrameLayout>
 
     <LinearLayout
