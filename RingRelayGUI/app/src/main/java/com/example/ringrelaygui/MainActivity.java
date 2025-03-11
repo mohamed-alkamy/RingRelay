@@ -23,14 +23,17 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
+    private int stepGoal = 50;
+
     private boolean isStatisticsVisible = false;
     private boolean isAlarmsVisible = false;
     private boolean isSettingsVisible = false;
     private Button centralButton;
-    private TextView mainTextDisplay;
+    private TextView mainTextDisplay, stepCountDisplay;
     private boolean isAlarmRinging = false;
-
     private CountDownTimer countDownTimer;
+
+    private Relay currentRelay; // Track the active relay
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         centralButton = findViewById(R.id.centralButton);
         mainTextDisplay = findViewById(R.id.mainTextDisplay);
+        stepCountDisplay = findViewById(R.id.stepCountDisplay);
 
         // Register broadcast receiver
         LocalBroadcastManager.getInstance(this).registerReceiver(widgetReceiver, new IntentFilter("UPDATE_WIDGET_TEXT"));
@@ -50,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         centralButton.setOnClickListener(v -> {
             if (isAlarmRinging) {
                 stopAlarmAndStartRelay();
+                stepCountDisplay.setText("Steps: " + currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal());
+
+            } else if (currentRelay != null && currentRelay.isActive()) {
+                incrementSteps();
             }
         });
     }
@@ -94,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             if (newText != null) {
                 mainTextDisplay.setText(newText);
                 isAlarmRinging = true; // Mark that alarm is ringing
+                startNewRelay(); // Start a relay when the first snooze happens
             }
         }
     };
@@ -115,9 +124,14 @@ public class MainActivity extends AppCompatActivity {
         startRelayCountdown();
     }
 
+    private void startNewRelay() {
+        if (currentRelay == null || !currentRelay.isActive()) {
+            currentRelay = new Relay(stepGoal, "07:00 AM"); // Example step goal and time
+        }
+    }
 
     private void startRelayCountdown() {
-        countDownTimer = new CountDownTimer(300000, 1000) { // 5 minutes
+        countDownTimer = new CountDownTimer(30000, 1000) { // 5 minutes
             @Override
             public void onTick(long millisUntilFinished) {
                 long minutes = millisUntilFinished / 60000;
@@ -127,10 +141,64 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFinish() {
-                mainTextDisplay.setText("RELAY FAILED!"); // Reset after timer finishes
-                restartAlarmAfterSnooze();
+                if (currentRelay != null && !currentRelay.isStepGoalMet()) {
+                    Log.d("RelayDebug", "Step goal not met, restarting alarm");
+
+                    mainTextDisplay.setText("RELAY FAILED!"); // Reset after timer finishes
+                    restartAlarmAfterSnooze();
+                    currentRelay.setCurrentSteps(0);
+                    stepCountDisplay.setText("Steps: " + currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal());
+                } else {
+                    completeRelay();
+                }
             }
         }.start();
+    }
+
+    private void incrementSteps() {
+        if (currentRelay != null && currentRelay.isActive()) {
+            currentRelay.incrementSteps();
+            stepCountDisplay.setText("Steps: " + currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal());
+
+            if (currentRelay.isStepGoalMet()) {
+                Log.d("RelayDebug", "Step goal met!");
+                completeRelay();
+            }
+        }
+    }
+
+    private void restartAlarmAfterSnooze() {
+        Log.d("AlarmDebug", "Restarting alarm after snooze");
+        if (currentRelay != null) {
+            currentRelay.snooze();
+
+            // Start alarm sound immediately
+            Intent serviceIntent = new Intent(this, AlarmService.class);
+            startService(serviceIntent);
+
+            // Create an intent for the AlarmReceiver
+            Intent intent = new Intent(this, AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            );
+
+            // Set up the AlarmManager
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            if (alarmManager != null) {
+                long triggerTime = System.currentTimeMillis() + 1000; // Backup trigger after 1s
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+            }
+        }
+    }
+
+    private void completeRelay() {
+        if (currentRelay != null) {
+            Log.d("RelayDebug", "Relay completed successfully!");
+            currentRelay.completeRelay();
+            onDestroy();
+            mainTextDisplay.setText("Relay Complete!");
+            stepCountDisplay.setText("");
+        }
     }
 
     @Override
@@ -139,27 +207,6 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(widgetReceiver);
         if (countDownTimer != null) {
             countDownTimer.cancel();
-        }
-    }
-
-    private void restartAlarmAfterSnooze() {
-        Log.d("AlarmDebug", "Restarting alarm after snooze");
-
-        // Start alarm sound immediately
-        Intent serviceIntent = new Intent(this, AlarmService.class);
-        startService(serviceIntent);
-
-        // Create an intent for the AlarmReceiver
-        Intent intent = new Intent(this, AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        // Set up the AlarmManager
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        if (alarmManager != null) {
-            long triggerTime = System.currentTimeMillis() + 1000; // Backup trigger after 1s
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
         }
     }
 }
