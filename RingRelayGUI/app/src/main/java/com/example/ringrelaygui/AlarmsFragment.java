@@ -60,8 +60,6 @@ public class AlarmsFragment extends Fragment {
 
         return view;
     }
-
-
     private String getSelectedTime() {
         int hour = timePicker.getHour();
         int minute = timePicker.getMinute();
@@ -85,7 +83,6 @@ public class AlarmsFragment extends Fragment {
 
         return time;
     }
-
     private void saveAlarm(AlarmEntity alarm) {
         AsyncTask.execute(() -> {
             alarmDatabase.alarmDao().insert(alarm);
@@ -120,7 +117,6 @@ public class AlarmsFragment extends Fragment {
             });
         });
     }
-
     private int convertTo24Hour(String time) {
         String[] parts = time.split(" "); // Split into "hh:mm" and "AM/PM"
         String[] hm = parts[0].split(":"); // Split "hh:mm" into "hh" and "mm"
@@ -138,7 +134,6 @@ public class AlarmsFragment extends Fragment {
 
         return (hour * 60) + minute; // Convert to total minutes since 00:00
     }
-
     public void toggleAlarm(AlarmEntity alarm, boolean isEnabled) {
         if (isEnabled) {
             scheduleSystemAlarm(requireContext(), alarm);
@@ -152,7 +147,6 @@ public class AlarmsFragment extends Fragment {
             alarmDatabase.alarmDao().update(alarm);
         });
     }
-
     private void scheduleSystemAlarm(Context context, AlarmEntity alarm) {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
@@ -215,8 +209,6 @@ public class AlarmsFragment extends Fragment {
             Log.e("AlarmManager", "SecurityException: Unable to schedule exact alarm", e);
         }
     }
-
-
     private void cancelSystemAlarm(AlarmEntity alarm) {
         return;
     }
