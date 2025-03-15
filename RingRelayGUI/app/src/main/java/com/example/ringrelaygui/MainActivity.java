@@ -63,14 +63,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleFragment(Fragment fragment, String tag) {
+        if (isFinishing() || isDestroyed()) {
+            Log.e("FragmentError", "Attempted to commit a fragment transaction after the activity was destroyed.");
+            return; // Prevent crashes
+        }
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         Fragment existingFragment = fragmentManager.findFragmentByTag(tag);
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        // Get reference to the home layout
         View homeLayout = findViewById(R.id.homeLayout);
 
-        // Set animations based on the direction
         switch (tag) {
             case "LEFT":
                 transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_left);
@@ -85,14 +88,19 @@ public class MainActivity extends AppCompatActivity {
 
         if (existingFragment != null && existingFragment.isVisible()) {
             transaction.remove(existingFragment);
-            homeLayout.setVisibility(View.VISIBLE); // Show home screen
+            homeLayout.setVisibility(View.VISIBLE);
         } else {
             transaction.replace(R.id.fragment_container, fragment, tag);
-            homeLayout.setVisibility(View.GONE); // Hide home screen
+            homeLayout.setVisibility(View.GONE);
         }
 
-        transaction.commit();
+        try {
+            transaction.commit();
+        } catch (IllegalStateException e) {
+            Log.e("FragmentError", "Failed to commit fragment transaction: " + e.getMessage());
+        }
     }
+
 
     private final BroadcastReceiver widgetReceiver = new BroadcastReceiver() {
         @Override
@@ -131,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRelayCountdown() {
-        countDownTimer = new CountDownTimer(30000, 1000) { // 5 minutes
+        countDownTimer = new CountDownTimer(300000, 1000) { // 5 minutes
             @Override
             public void onTick(long millisUntilFinished) {
                 long minutes = millisUntilFinished / 60000;
@@ -195,9 +203,20 @@ public class MainActivity extends AppCompatActivity {
         if (currentRelay != null) {
             Log.d("RelayDebug", "Relay completed successfully!");
             currentRelay.completeRelay();
-            onDestroy();
+            if (countDownTimer != null) {
+                countDownTimer.cancel();
+            }
             mainTextDisplay.setText("Relay Complete!");
             stepCountDisplay.setText("");
+
+
+            //IN THIS AREA IS WHERE YOU SHOULD HANDLE STAT TRACKING
+            //This will pause the timer and end the tone
+            //after what you add in this section the app will be rest to default state
+
+            
+            currentRelay = null;
+            mainTextDisplay.setText("RINGRELAY");
         }
     }
 
