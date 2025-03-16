@@ -1,11 +1,16 @@
 package com.example.ringrelaygui;
 
+import com.example.ringrelaygui.AlarmDatabase;
+import com.example.ringrelaygui.AlarmDao;
+import com.example.ringrelaygui.AlarmEntity;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -18,12 +23,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-
-    private int stepGoal = 50;
+    private AlarmDatabase alarmDatabase;
+    private int stepGoal = 5;
 
     private boolean isStatisticsVisible = false;
     private boolean isAlarmsVisible = false;
@@ -39,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        alarmDatabase = AlarmDatabase.getInstance(this);
 
         centralButton = findViewById(R.id.centralButton);
         mainTextDisplay = findViewById(R.id.mainTextDisplay);
@@ -209,16 +217,35 @@ public class MainActivity extends AppCompatActivity {
             mainTextDisplay.setText("Relay Complete!");
             stepCountDisplay.setText("");
 
+            String startTime = currentRelay.getFormattedStartTime();
+            String endTime = currentRelay.getFormattedEndTime();
+            String date = currentRelay.getFormattedDate();
+            String stepCount = currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal();
+
+            Log.d("RelayDebug", "Saving Relay - Start: " + startTime + ", End: " + endTime);
 
             //IN THIS AREA IS WHERE YOU SHOULD HANDLE STAT TRACKING
             //This will pause the timer and end the tone
             //after what you add in this section the app will be rest to default state
 
-            
+            CompletedRelayEntity relay = new CompletedRelayEntity(startTime, endTime, date, stepCount);
+            AsyncTask.execute(() -> {
+                    alarmDatabase.alarmDao().insertCompletedRelay(relay);
+            });
+
+
+            StatisticsFragment statisticsFragment = new StatisticsFragment();
+
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, statisticsFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+
             currentRelay = null;
             mainTextDisplay.setText("RINGRELAY");
         }
     }
+
 
     @Override
     protected void onDestroy() {

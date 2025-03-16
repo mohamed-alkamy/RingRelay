@@ -19,6 +19,12 @@ public interface AlarmDao {
     @Update
     void update(AlarmEntity alarm);
 
+    @Insert
+    void insertCompletedRelay(CompletedRelayEntity relay);
+
+    @Query("SELECT * FROM completed_relays")
+    List<CompletedRelayEntity> getAllCompletedRelays();
+
     @Query("SELECT * FROM alarms")
     List<AlarmEntity> getAllAlarms();
 }
