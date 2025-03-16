@@ -8,13 +8,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class RelayHistoryAdapter extends RecyclerView.Adapter<RelayHistoryAdapter.RelayViewHolder> {
-    private List<AlarmEntity> relayHistory;
+    private List<CompletedRelayEntity> relayHistory;
     private Context context;
 
-    public RelayHistoryAdapter(Context context, List<AlarmEntity> relayHistory) {
+    public RelayHistoryAdapter(Context context, ArrayList<CompletedRelayEntity> relayHistory) {
         this.context = context;
         this.relayHistory = relayHistory;
     }
@@ -28,9 +30,11 @@ public class RelayHistoryAdapter extends RecyclerView.Adapter<RelayHistoryAdapte
 
     @Override
     public void onBindViewHolder(@NonNull RelayViewHolder holder, int position) {
-        AlarmEntity relay = relayHistory.get(position);
+        CompletedRelayEntity relay = relayHistory.get(position);
         holder.startTimeTextView.setText("Start: " + relay.startTime);
         holder.endTimeTextView.setText("End: " + relay.endTime);
+        holder.dateTextView.setText("Date: " + relay.date);
+        holder.stepCountTextView.setText("Steps: " + relay.stepCount);
     }
 
     @Override
@@ -39,12 +43,14 @@ public class RelayHistoryAdapter extends RecyclerView.Adapter<RelayHistoryAdapte
     }
 
     public static class RelayViewHolder extends RecyclerView.ViewHolder {
-        TextView startTimeTextView, endTimeTextView;
+        TextView startTimeTextView, endTimeTextView, dateTextView, stepCountTextView;
 
         public RelayViewHolder(@NonNull View itemView) {
             super(itemView);
             startTimeTextView = itemView.findViewById(R.id.startTimeTextView);
             endTimeTextView = itemView.findViewById(R.id.endTimeTextView);
+            dateTextView = itemView.findViewById(R.id.dateTextView);
+            stepCountTextView = itemView.findViewById(R.id.stepCountTextView);
         }
     }
 }

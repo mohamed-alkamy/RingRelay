@@ -22,13 +22,6 @@
         android:textSize="16sp"
         android:paddingTop="8dp"/>
 
-    <Button
-        android:id="@+id/updateStatsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Update Data"/>
-
-
     <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/recyclerView"
         android:layout_width="match_parent"

@@ -29,10 +29,10 @@ public class StatisticsFragment extends Fragment {
 
         alarmDatabase = AlarmDatabase.getInstance(getContext());
         AsyncTask.execute(() -> {
-            List<AlarmEntity> alarms = alarmDatabase.alarmDao().getAllAlarms();
-            ArrayList<AlarmEntity> alarmArrayList = new ArrayList<>(alarms);
+            List<CompletedRelayEntity> relays = alarmDatabase.alarmDao().getAllCompletedRelays();
+            ArrayList<CompletedRelayEntity> relayArrayList = new ArrayList<>(relays);
             getActivity().runOnUiThread(() -> {
-                RelayHistoryAdapter adapter = new RelayHistoryAdapter(getContext(), alarmArrayList);
+                RelayHistoryAdapter adapter = new RelayHistoryAdapter(getContext(), relayArrayList);
                 recyclerView.setAdapter(adapter);
             });
         });
