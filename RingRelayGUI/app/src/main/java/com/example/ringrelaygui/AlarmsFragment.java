@@ -53,7 +53,9 @@ public class AlarmsFragment extends Fragment {
         // Set Alarm Button Click
         setAlarmButton.setOnClickListener(v -> {
             String alarmTime = getSelectedTime();
-            AlarmEntity newAlarm = new AlarmEntity(alarmTime, true);
+            String startTime = alarmTime;
+            String endTime = alarmTime;
+            AlarmEntity newAlarm = new AlarmEntity(alarmTime, true,startTime, endTime);
             saveAlarm(newAlarm);
             scheduleSystemAlarm(requireContext(),newAlarm);
         });

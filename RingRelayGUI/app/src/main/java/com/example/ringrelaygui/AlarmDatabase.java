@@ -5,7 +5,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {AlarmEntity.class}, version = 1)  // ✅ Ensure version = 1 (or higher if upgrading)
+@Database(entities = {AlarmEntity.class}, version = 2)  // ✅ Ensure version = 1 (or higher if upgrading)
 public abstract class AlarmDatabase extends RoomDatabase {
     private static volatile AlarmDatabase instance;
 
