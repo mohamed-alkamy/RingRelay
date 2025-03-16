@@ -3,26 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E0E0E0"
-    android:backgroundTint="#BCBEC3">
-
+    android:background="@drawable/ringrelaybackground">
     <!-- Title -->
 
 
     <!-- Central Circle -->
-    <View
-        android:id="@+id/centralCircle"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_centerInParent="true"
-        android:background="@drawable/circle_shape" />
 
-    <Button
+    <ImageButton
         android:id="@+id/centralButton"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:backgroundTint="#15485B" />
+        android:background="#AE7DCC"
+        app:srcCompat="@drawable/centreball" />
 
     <TextView
         android:id="@+id/mainTextDisplay"

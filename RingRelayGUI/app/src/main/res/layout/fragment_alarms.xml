@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CECECE"
+    android:background="@drawable/fragmentbg"
     android:orientation="vertical"
     android:padding="16dp">
 
@@ -22,6 +22,7 @@
             android:layout_gravity="center_horizontal"
             android:paddingBottom="8dp"
             android:text="Set New Alarm"
+            android:textColor="#000000"
             android:textSize="34sp"
             android:textStyle="bold" />
 
@@ -36,8 +37,9 @@
                 android:id="@+id/timePicker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:timePickerMode="spinner"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:amPmTextColor="@color/white"
+                android:timePickerMode="spinner" />
 
         </LinearLayout>
         <Button
@@ -57,7 +59,6 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_weight="1"
-        android:background="#CECECE"
         android:orientation="vertical"
         android:padding="8dp">
 
@@ -67,6 +68,7 @@
             android:layout_gravity="center_horizontal"
             android:paddingBottom="4dp"
             android:text="Saved Alarms"
+            android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold" />
 

@@ -22,6 +22,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isStatisticsVisible = false;
     private boolean isAlarmsVisible = false;
     private boolean isSettingsVisible = false;
-    private Button centralButton;
+    private ImageButton centralButton;
     private TextView mainTextDisplay, stepCountDisplay;
     private boolean isAlarmRinging = false;
     private CountDownTimer countDownTimer;
