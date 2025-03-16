@@ -9,13 +9,10 @@ public class AlarmEntity {
     public int id;
     public String time;
     public boolean isEnabled;
-    public String startTime;
-    public String endTime;
-    public AlarmEntity(String time, boolean isEnabled,String startTime, String endTime) {
+
+    public AlarmEntity(String time, boolean isEnabled) {
         this.time = time;
         this.isEnabled = isEnabled;
-        this.startTime = startTime;
-        this.endTime = endTime;
     }
 
     public int getId() { return id; }

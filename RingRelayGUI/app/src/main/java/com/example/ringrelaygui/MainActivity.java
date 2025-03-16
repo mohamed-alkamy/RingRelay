@@ -219,15 +219,18 @@ public class MainActivity extends AppCompatActivity {
 
             String startTime = currentRelay.getFormattedStartTime();
             String endTime = currentRelay.getFormattedEndTime();
+            String date = currentRelay.getFormattedDate();
+            String stepCount = currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal();
+
             Log.d("RelayDebug", "Saving Relay - Start: " + startTime + ", End: " + endTime);
 
             //IN THIS AREA IS WHERE YOU SHOULD HANDLE STAT TRACKING
             //This will pause the timer and end the tone
             //after what you add in this section the app will be rest to default state
 
-            AlarmEntity alarm = new AlarmEntity(currentRelay.getAlarmTime(), true, startTime, endTime);
+            CompletedRelayEntity relay = new CompletedRelayEntity(startTime, endTime, date, stepCount);
             AsyncTask.execute(() -> {
-                    alarmDatabase.alarmDao().insert(alarm);
+                    alarmDatabase.alarmDao().insertCompletedRelay(relay);
             });
 
 

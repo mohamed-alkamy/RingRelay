@@ -75,9 +75,13 @@ public class Relay {
     public String getFormattedEndTime() {
         return formatTime(endTime);
     }
-
     private String formatTime(long timestamp) {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         return sdf.format(new Date(timestamp));
+    }
+
+    public String getFormattedDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        return sdf.format(new Date());
     }
 }
