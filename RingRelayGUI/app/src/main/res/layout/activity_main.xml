@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ringrelaybackground">
+    android:background="@drawable/ringrelaybackground"
+    android:visibility="visible">
     <!-- Title -->
 
 
@@ -28,8 +29,6 @@
 
 
 
-    <!-- Bottom Navigation Buttons -->
-
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
@@ -53,6 +52,18 @@
             android:textColor="@android:color/black"
             android:textSize="25sp" />
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="350dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:max="100"
+            android:progress="1"
+            android:progressDrawable="@drawable/custom_progress_bg"
+            android:visibility="invisible" />
+
 
     </FrameLayout>
 
@@ -62,29 +73,32 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="5dp"
         android:orientation="horizontal">
 
-        <Button
+        <ImageButton
             android:id="@+id/statisticsButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_margin="10dp"
-            android:backgroundTint="#15485B" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:backgroundTint="#0056507B"
+            android:src="@drawable/statlogo" />
 
-        <Button
+        <ImageButton
             android:id="@+id/alarmsButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_margin="10dp"
-            android:backgroundTint="#15485B" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:backgroundTint="#0056507B"
+            android:src="@drawable/alarmlogo" />
 
-        <Button
+        <ImageButton
             android:id="@+id/settingsButton"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_margin="10dp"
-            android:backgroundTint="#15485B" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:backgroundTint="#0056507B"
+            android:src="@drawable/settinglogo" />
     </LinearLayout>
 
 </RelativeLayout>

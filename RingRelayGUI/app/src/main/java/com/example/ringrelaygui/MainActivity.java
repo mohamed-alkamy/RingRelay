@@ -23,6 +23,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isAlarmRinging = false;
     private CountDownTimer countDownTimer;
 
+    private ProgressBar progressBar;
+
     private Relay currentRelay; // Track the active relay
 
     @Override
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         centralButton = findViewById(R.id.centralButton);
         mainTextDisplay = findViewById(R.id.mainTextDisplay);
         stepCountDisplay = findViewById(R.id.stepCountDisplay);
+        progressBar = findViewById(R.id.progressBar);
 
         // Register broadcast receiver
         LocalBroadcastManager.getInstance(this).registerReceiver(widgetReceiver, new IntentFilter("UPDATE_WIDGET_TEXT"));
@@ -64,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
             if (isAlarmRinging) {
                 stopAlarmAndStartRelay();
                 stepCountDisplay.setText("Steps: " + currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal());
+
+
 
             } else if (currentRelay != null && currentRelay.isActive()) {
                 incrementSteps();
@@ -136,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Reset alarm state
         isAlarmRinging = false;
+        progressBar.setVisibility(View.VISIBLE);
 
         // Start 5-minute countdown
         startRelayCountdown();
@@ -177,6 +184,8 @@ public class MainActivity extends AppCompatActivity {
             currentRelay.incrementSteps();
             stepCountDisplay.setText("Steps: " + currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal());
 
+            //need to make progress bar work universally
+            progressBar.setProgress((progressBar.getProgress())+20);
             if (currentRelay.isStepGoalMet()) {
                 Log.d("RelayDebug", "Step goal met!");
                 completeRelay();
@@ -217,6 +226,7 @@ public class MainActivity extends AppCompatActivity {
             }
             mainTextDisplay.setText("Relay Complete!");
             stepCountDisplay.setText("");
+            progressBar.setVisibility(View.INVISIBLE);
 
             String startTime = currentRelay.getFormattedStartTime();
             String endTime = currentRelay.getFormattedEndTime();
