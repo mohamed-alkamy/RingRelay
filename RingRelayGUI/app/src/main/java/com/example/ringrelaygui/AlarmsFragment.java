@@ -138,7 +138,7 @@ public class AlarmsFragment extends Fragment {
         if (isEnabled) {
             scheduleSystemAlarm(requireContext(), alarm);
         } else {
-            cancelSystemAlarm(alarm);
+            alarm.isEnabled = false;
         }
 
         // Update database entry
@@ -208,9 +208,6 @@ public class AlarmsFragment extends Fragment {
         } catch (SecurityException e) {
             Log.e("AlarmManager", "SecurityException: Unable to schedule exact alarm", e);
         }
-    }
-    private void cancelSystemAlarm(AlarmEntity alarm) {
-        return;
     }
 
 }
