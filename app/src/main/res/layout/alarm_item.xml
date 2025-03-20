@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/alarmTimeText"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="06:30 AM"
+        android:textSize="18sp"/>
+
+    <Switch
+        android:id="@+id/alarmSwitch"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:thumbTint="#15485B"
+        android:trackTint="#4CC1B7" />
+
+    <Button
+        android:id="@+id/alarmDelete"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:backgroundTint="#15485B"
+        android:text="X" />
+</LinearLayout>
