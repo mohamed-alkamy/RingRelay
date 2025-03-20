@@ -31,7 +31,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private AlarmDatabase alarmDatabase;
-    private int stepGoal = 5;
+    private int stepGoal = 50;
 
     private boolean isStatisticsVisible = false;
     private boolean isAlarmsVisible = false;
@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
 
-    private Relay currentRelay; // Track the active relay
+    private Relay currentRelay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,7 +185,8 @@ public class MainActivity extends AppCompatActivity {
             stepCountDisplay.setText("Steps: " + currentRelay.getCurrentSteps() + "/" + currentRelay.getStepGoal());
 
             //need to make progress bar work universally
-            progressBar.setProgress((progressBar.getProgress())+20);
+
+            progressBar.setProgress((progressBar.getProgress())+((100/currentRelay.getStepGoal())));
             if (currentRelay.isStepGoalMet()) {
                 Log.d("RelayDebug", "Step goal met!");
                 completeRelay();
@@ -256,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
             mainTextDisplay.setText("RINGRELAY");
         }
     }
-
 
     @Override
     protected void onDestroy() {

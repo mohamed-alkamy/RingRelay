@@ -27,4 +27,12 @@ public interface AlarmDao {
 
     @Query("SELECT * FROM alarms")
     List<AlarmEntity> getAllAlarms();
+
+    @Query("SELECT * FROM alarms WHERE time = :alarmTime LIMIT 1")
+    AlarmEntity getAlarmByTime(String alarmTime);
+
+    @Query("SELECT * FROM alarms WHERE isEnabled = 1")
+    List<AlarmEntity> getEnabledAlarms();
+
+
 }

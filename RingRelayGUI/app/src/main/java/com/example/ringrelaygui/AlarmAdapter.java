@@ -2,6 +2,7 @@ package com.example.ringrelaygui;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,12 @@ import java.util.ArrayList;
 
 public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
     private AlarmDatabase alarmDatabase;
+    private ArrayList<AlarmEntity> alarmList;
 
     public AlarmAdapter(Context context, ArrayList<AlarmEntity> alarms) {
         super(context, 0, alarms);
         alarmDatabase = AlarmDatabase.getInstance(context);
+        this.alarmList = alarms;
     }
 
     @Override
@@ -33,14 +36,19 @@ public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
 
         if (alarm != null) {
             alarmTime.setText(alarm.getTime());
+
+            // Prevent incorrect toggles due to recycled views
+            alarmSwitch.setOnCheckedChangeListener(null);
             alarmSwitch.setChecked(alarm.isEnabled());
 
+            // Toggle switch logic
             alarmSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                alarm.setEnabled(isChecked); // Update object
-                updateAlarmInDatabase(alarm); // Save change to DB
+                alarm.setEnabled(isChecked);
+                updateAlarmInDatabase(alarm);
+                Log.d("AlarmAdapter", "Made Alarm activation " + alarm.isEnabled());
             });
 
-            // Handle Delete Button Click
+            // Delete button logic
             alarmDelete.setOnClickListener(v -> deleteAlarm(position, alarm));
         }
 
@@ -50,7 +58,10 @@ public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
     private void deleteAlarm(int position, AlarmEntity alarm) {
         AsyncTask.execute(() -> {
             alarmDatabase.alarmDao().delete(alarm);
-            ((AlarmsFragment) ((MainActivity) getContext()).getSupportFragmentManager().findFragmentById(R.id.fragment_container)).removeAlarmFromList(position);
+
+            // Remove from UI list and update adapter
+            alarmList.remove(position);
+            ((MainActivity) getContext()).runOnUiThread(this::notifyDataSetChanged);
         });
     }
 
@@ -60,6 +71,3 @@ public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
         });
     }
 }
-
-
-
