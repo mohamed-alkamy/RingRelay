@@ -1,93 +1,112 @@
-package com.example.basicalarmapp;
+package com.example.stepcounterapp;
 
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TimePicker;
-import androidx.appcompat.app.AppCompatActivity;
-import java.util.Calendar;
+import android.Manifest;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Build;
+import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-    private TimePicker timePicker;
-    private Button setAlarmButton;
+
+    private SensorManager sensorManager;
+    private Sensor stepDetectorSensor;
+    private SensorEventListener stepListener;
+    private TextView stepCountText;
+    private int stepCount = 0;
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            if (!alarmManager.canScheduleExactAlarms()) {
-                showPermissionDialog();
-            }
-        }
-        timePicker = findViewById(R.id.timePicker);
-        setAlarmButton = findViewById(R.id.setAlarmButton);
+        // Initialize UI components
+        stepCountText = findViewById(R.id.stepCountText);
 
-        setAlarmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int hour = timePicker.getHour();
-                int minute = timePicker.getMinute();
-                setAlarm(MainActivity.this, hour, minute);
-            }
-        });
-    }
-    private void showPermissionDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Permission Required")
-                .setMessage("This app needs permission to schedule exact alarms. Please enable it in settings.")
-                .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                        startActivity(intent);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Toast.makeText(MainActivity.this, "Alarm permission not granted!", Toast.LENGTH_LONG).show();
-                    }
-                })
-                .show();
-    }
+        // Load previous step count
+        sharedPreferences = getSharedPreferences("StepPrefs", MODE_PRIVATE);
+        stepCount = sharedPreferences.getInt("step_count", 0);
+        updateStepUI();
 
-    @SuppressLint("ScheduleExactAlarm")
-    public void setAlarm(Context context, int hour, int minute) {
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, AlarmReceiver.class);
+        // Initialize SensorManager
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-        // ✅ FIX: Add FLAG_IMMUTABLE for Android 12+
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, hour);
-        calendar.set(Calendar.MINUTE, minute);
-        calendar.set(Calendar.SECOND, 0);
-
-        Log.d("AlarmDebug", "Setting alarm for: " + calendar.getTime());
-
-        if (alarmManager != null) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-            Toast.makeText(context, "Alarm Set!", Toast.LENGTH_SHORT).show();
+        // Check if Step Detector Sensor is available
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR) != null) {
+            stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
         } else {
-            Log.e("AlarmDebug", "AlarmManager is NULL");
+            Toast.makeText(this, "Step Detector sensor not available!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Request runtime permission for activity recognition (API 29+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[] { Manifest.permission.ACTIVITY_RECOGNITION }, 1);
+        } else {
+            startStepTracking();
         }
     }
 
+    private void startStepTracking() {
+        // Define the step listener
+        stepListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                if (event != null) {
+                    incrementStep();
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                // Not needed for this sensor
+            }
+        };
+
+        // Register the listener
+        sensorManager.registerListener(stepListener, stepDetectorSensor, SensorManager.SENSOR_DELAY_UI);
+    }
+
+    private void incrementStep() {
+        stepCount++;
+        updateStepUI();
+
+        // Save updated step count
+        sharedPreferences.edit().putInt("step_count", stepCount).apply();
+    }
+
+    private void updateStepUI() {
+        stepCountText.setText("Steps: " + stepCount);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister the listener to save battery
+        if (stepListener != null) {
+            sensorManager.unregisterListener(stepListener);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == 1 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startStepTracking();
+        } else {
+            Toast.makeText(this, "Permission denied. Cannot track steps.", Toast.LENGTH_LONG).show();
+        }
+    }
 }
