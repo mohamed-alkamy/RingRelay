@@ -42,13 +42,14 @@
                 android:timePickerMode="spinner" />
 
         </LinearLayout>
+
         <Button
             android:id="@+id/setAlarmButton"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="8dp"
-            android:backgroundTint="#15485B"
+            android:backgroundTint="#46406d"
             android:text="Set Alarm" />
 
 
