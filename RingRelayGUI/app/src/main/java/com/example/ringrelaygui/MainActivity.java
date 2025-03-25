@@ -10,9 +10,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.preference.PreferenceManager;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -31,18 +33,11 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private AlarmDatabase alarmDatabase;
-    private int stepGoal = 50;
-
-    private boolean isStatisticsVisible = false;
-    private boolean isAlarmsVisible = false;
-    private boolean isSettingsVisible = false;
     private ImageButton centralButton;
     private TextView mainTextDisplay, stepCountDisplay;
     private boolean isAlarmRinging = false;
     private CountDownTimer countDownTimer;
-
     private ProgressBar progressBar;
-
     private Relay currentRelay;
 
     @Override
@@ -75,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 incrementSteps();
             }
         });
+        checkIfAlarmWasRinging();
     }
 
     private void toggleFragment(Fragment fragment, String tag) {
@@ -130,6 +126,23 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private void checkIfAlarmWasRinging() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean wasRinging = prefs.getBoolean("isAlarmRinging", false);
+
+        if (wasRinging) {
+            Log.d("AlarmDebug", "Detected ringing alarm on app open, preparing relay.");
+
+            // Reset the flag since we are handling it now
+            prefs.edit().putBoolean("isAlarmRinging", false).apply();
+
+            // Update UI and start relay
+            mainTextDisplay.setText("Start Relay");
+            isAlarmRinging = true;
+            startNewRelay();
+        }
+    }
+
     private void stopAlarmAndStartRelay() {
         Log.d("AlarmDebug", "Stopping alarm and starting relay countdown");
 
@@ -140,22 +153,28 @@ public class MainActivity extends AppCompatActivity {
         // Ensure the alarm stops
         AlarmService.stopAlarm();
 
+        // Clear alarm flag
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("isAlarmRinging", false).apply();
+
         // Reset alarm state
         isAlarmRinging = false;
         progressBar.setVisibility(View.VISIBLE);
 
         // Start 5-minute countdown
-        startRelayCountdown();
+        SharedPreferences sharedPreferences = getSharedPreferences("RelaySettings", MODE_PRIVATE);
+        startRelayCountdown(sharedPreferences.getLong("relay_Length", 300000));
     }
 
     private void startNewRelay() {
         if (currentRelay == null || !currentRelay.isActive()) {
-            currentRelay = new Relay(stepGoal, "07:00 AM"); // Example step goal and time
+            SharedPreferences sharedPreferences = getSharedPreferences("RelaySettings", MODE_PRIVATE);
+            currentRelay = new Relay(sharedPreferences.getInt("step_goal", 50), "07:00 AM");
         }
     }
 
-    private void startRelayCountdown() {
-        countDownTimer = new CountDownTimer(300000, 1000) { // 5 minutes
+    private void startRelayCountdown(long length) {
+        countDownTimer = new CountDownTimer(length, 1000) { // 5 minutes
             @Override
             public void onTick(long millisUntilFinished) {
                 long minutes = millisUntilFinished / 60000;

@@ -3,8 +3,10 @@ package com.example.ringrelaygui;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -14,6 +16,9 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String alarmTime = intent.getStringExtra("alarmTime");
         Log.d("AlarmReceiver", "Alarm triggered for: " + alarmTime);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        prefs.edit().putBoolean("isAlarmRinging", true).apply();
 
         new Thread(() -> {
             AlarmDatabase db = AlarmDatabase.getInstance(context);
