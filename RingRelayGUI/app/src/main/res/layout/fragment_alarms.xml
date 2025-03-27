@@ -7,14 +7,12 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Alarm Setting Section (Takes Most of the Screen) -->
-
-    <!-- Saved Alarms Section (Fixed Height at the Bottom) -->
+    <!-- Alarm Setting Section -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1">
 
         <TextView
             android:layout_width="wrap_content"
@@ -26,7 +24,7 @@
             android:textSize="34sp"
             android:textStyle="bold" />
 
-        <!-- Dropdowns for Time Selection -->
+        <!-- Time Picker -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,21 +38,31 @@
                 android:layout_gravity="center"
                 android:amPmTextColor="@color/white"
                 android:timePickerMode="spinner" />
-
         </LinearLayout>
 
+        <!-- Step Goal Input -->
+        <EditText
+            android:id="@+id/stepGoalInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Step Goal (default: 50)"
+            android:inputType="number"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"/>
+
+        <!-- Set Alarm Button -->
         <Button
             android:id="@+id/setAlarmButton"
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:backgroundTint="#46406d"
             android:text="Set Alarm" />
-
-
     </LinearLayout>
 
+    <!-- Saved Alarms Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -77,13 +85,11 @@
             android:id="@+id/savedAlarmsList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-
     </LinearLayout>
 
+    <!-- Bottom Spacer -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:orientation="vertical"></LinearLayout>
-
+        android:orientation="vertical"/>
 </LinearLayout>

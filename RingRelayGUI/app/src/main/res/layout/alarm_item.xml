@@ -3,11 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:weightSum="4">
 
     <TextView
         android:id="@+id/alarmTimeText"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="06:30 AM"
@@ -15,11 +16,21 @@
 
     <Switch
         android:id="@+id/alarmSwitch"
-        android:layout_width="100dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:checked="true"
         android:thumbTint="#56507d"
         android:trackTint="#FFFFFF" />
+
+    <Button
+        android:id="@+id/ringtoneButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Ringtone"
+        android:backgroundTint="#56507d"
+        android:textColor="@android:color/white"/>
 
     <Button
         android:id="@+id/alarmDelete"
@@ -27,5 +38,6 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:backgroundTint="#56507d"
-        android:text="X" />
+        android:text="X"
+        android:textColor="@android:color/white"/>
 </LinearLayout>

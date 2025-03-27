@@ -1,6 +1,9 @@
 package com.example.ringrelaygui;
 
-import android.content.Context;
+import android.app.Activity;
+import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,33 +36,45 @@ public class AlarmAdapter extends ArrayAdapter<AlarmEntity> {
         TextView alarmTime = convertView.findViewById(R.id.alarmTimeText);
         Switch alarmSwitch = convertView.findViewById(R.id.alarmSwitch);
         Button alarmDelete = convertView.findViewById(R.id.alarmDelete);
+        Button ringtoneButton = convertView.findViewById(R.id.ringtoneButton);
 
         if (alarm != null) {
             alarmTime.setText(alarm.getTime());
-
-            // Prevent incorrect toggles due to recycled views
             alarmSwitch.setOnCheckedChangeListener(null);
             alarmSwitch.setChecked(alarm.isEnabled());
 
-            // Toggle switch logic
             alarmSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
                 alarm.setEnabled(isChecked);
                 updateAlarmInDatabase(alarm);
                 Log.d("AlarmAdapter", "Made Alarm activation " + alarm.isEnabled());
             });
 
-            // Delete button logic
             alarmDelete.setOnClickListener(v -> deleteAlarm(position, alarm));
+
+            ringtoneButton.setOnClickListener(v -> {
+                Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Ringtone");
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, 
+                    Uri.parse(alarm.getRingtoneUri()));
+                ((Activity) getContext()).startActivityForResult(intent, position);
+            });
         }
 
         return convertView;
     }
 
+    public void updateAlarmRingtone(int position, Uri ringtoneUri) {
+        AlarmEntity alarm = getItem(position);
+        if (alarm != null && ringtoneUri != null) {
+            alarm.setRingtoneUri(ringtoneUri.toString());
+            updateAlarmInDatabase(alarm);
+        }
+    }
+
     private void deleteAlarm(int position, AlarmEntity alarm) {
         AsyncTask.execute(() -> {
             alarmDatabase.alarmDao().delete(alarm);
-
-            // Remove from UI list and update adapter
             alarmList.remove(position);
             ((MainActivity) getContext()).runOnUiThread(this::notifyDataSetChanged);
         });

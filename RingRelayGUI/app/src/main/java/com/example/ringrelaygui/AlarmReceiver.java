@@ -29,10 +29,11 @@ public class AlarmReceiver extends BroadcastReceiver {
                 return;
             }
 
-            Log.d("AlarmReceiver", "Alarm found in database. Proceeding with alarm.");
+            prefs.edit().putInt("current_step_goal", alarm.getStepGoal()).apply();
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 Intent serviceIntent = new Intent(context, AlarmService.class);
+                serviceIntent.putExtra("ringtone_uri", alarm.getRingtoneUri());
                 context.startService(serviceIntent);
 
                 Intent updateIntent = new Intent("UPDATE_WIDGET_TEXT");
@@ -42,4 +43,3 @@ public class AlarmReceiver extends BroadcastReceiver {
         }).start();
     }
 }
-
