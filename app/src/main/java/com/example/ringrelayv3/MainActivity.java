@@ -24,6 +24,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import java.util.Locale;
 
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor stepDetector;
     private int currentSteps = 0;
     private int stepGoal = 50;
+
+    private final Executor executor = Executors.newSingleThreadExecutor();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -245,8 +250,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 currentSteps + "/" + stepGoal
             );
 
-            AsyncTask.execute(() -> alarmDatabase.alarmDao().insertCompletedRelay(relay));
-
+            executor.execute(() -> {
+                alarmDatabase.alarmDao().insertCompletedRelay(relay);
+            });
             StatisticsFragment statisticsFragment = new StatisticsFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, statisticsFragment);

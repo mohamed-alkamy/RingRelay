@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
+import android.content.Context;
+
 
 import java.util.ArrayList;
 
