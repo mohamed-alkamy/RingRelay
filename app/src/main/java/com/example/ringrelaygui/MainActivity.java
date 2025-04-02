@@ -11,16 +11,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import android.Manifest;
+
 
 import android.util.Log;
 import android.widget.Button;
@@ -39,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
     private CountDownTimer countDownTimer;
     private ProgressBar progressBar;
     private Relay currentRelay;
+    private Sensor stepDetectorSensor;
+    private SensorEventListener stepListener;
+    private boolean isStepListenerActive = false;
+
+
+    private SensorManager sensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +63,34 @@ public class MainActivity extends AppCompatActivity {
 
         alarmDatabase = AlarmDatabase.getInstance(this);
 
+        requestActivityRecognitionPermission();
+
         centralButton = findViewById(R.id.centralButton);
         mainTextDisplay = findViewById(R.id.mainTextDisplay);
         stepCountDisplay = findViewById(R.id.stepCountDisplay);
         progressBar = findViewById(R.id.progressBar);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        stepDetectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+        if (stepDetectorSensor != null) {
+            stepListener = new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
+                        if (currentRelay != null && currentRelay.isActive()) {
+                            incrementSteps();
+                        }
+                    }
+                }
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                    // Not needed for step detection
+                }
+            };
+        }
+
+
+
 
         // Register broadcast receiver
         LocalBroadcastManager.getInstance(this).registerReceiver(widgetReceiver, new IntentFilter("UPDATE_WIDGET_TEXT"));
@@ -66,12 +106,42 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+
             } else if (currentRelay != null && currentRelay.isActive()) {
                 incrementSteps();
+
             }
         });
         checkIfAlarmWasRinging();
     }
+
+    private static final int ACTIVITY_RECOGNITION_REQUEST_CODE = 1001;
+
+    private void requestActivityRecognitionPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { // Only required for Android 10+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACTIVITY_RECOGNITION},
+                        ACTIVITY_RECOGNITION_REQUEST_CODE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == ACTIVITY_RECOGNITION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("Permissions", "Activity Recognition permission granted!");
+            } else {
+                Log.e("Permissions", "Activity Recognition permission denied!");
+            }
+        }
+    }
+
+
 
     private void toggleFragment(Fragment fragment, String tag) {
         if (isFinishing() || isDestroyed()) {
@@ -170,8 +240,15 @@ public class MainActivity extends AppCompatActivity {
         if (currentRelay == null || !currentRelay.isActive()) {
             SharedPreferences sharedPreferences = getSharedPreferences("RelaySettings", MODE_PRIVATE);
             currentRelay = new Relay(sharedPreferences.getInt("step_goal", 50), "07:00 AM");
+
+            // Register the step sensor listener when relay starts
+            if (stepDetectorSensor != null && !isStepListenerActive) {
+                sensorManager.registerListener(stepListener, stepDetectorSensor, SensorManager.SENSOR_DELAY_UI);
+                isStepListenerActive = true;
+            }
         }
     }
+
 
     private void startRelayCountdown(long length) {
         countDownTimer = new CountDownTimer(length, 1000) { // 5 minutes
@@ -241,13 +318,22 @@ public class MainActivity extends AppCompatActivity {
         if (currentRelay != null) {
             Log.d("RelayDebug", "Relay completed successfully!");
             currentRelay.completeRelay();
+
             if (countDownTimer != null) {
                 countDownTimer.cancel();
             }
+
             mainTextDisplay.setText("Relay Complete!");
             stepCountDisplay.setText("");
             progressBar.setVisibility(View.INVISIBLE);
 
+            // Unregister step sensor when relay is done
+            if (isStepListenerActive) {
+                sensorManager.unregisterListener(stepListener);
+                isStepListenerActive = false;
+            }
+
+            // Save relay stats
             String startTime = currentRelay.getFormattedStartTime();
             String endTime = currentRelay.getFormattedEndTime();
             String date = currentRelay.getFormattedDate();
@@ -255,18 +341,10 @@ public class MainActivity extends AppCompatActivity {
 
             Log.d("RelayDebug", "Saving Relay - Start: " + startTime + ", End: " + endTime);
 
-            //IN THIS AREA IS WHERE YOU SHOULD HANDLE STAT TRACKING
-            //This will pause the timer and end the tone
-            //after what you add in this section the app will be rest to default state
-
             CompletedRelayEntity relay = new CompletedRelayEntity(startTime, endTime, date, stepCount);
-            AsyncTask.execute(() -> {
-                    alarmDatabase.alarmDao().insertCompletedRelay(relay);
-            });
-
+            AsyncTask.execute(() -> alarmDatabase.alarmDao().insertCompletedRelay(relay));
 
             StatisticsFragment statisticsFragment = new StatisticsFragment();
-
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, statisticsFragment);
             transaction.addToBackStack(null);
@@ -276,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
             mainTextDisplay.setText("RINGRELAY");
         }
     }
+
 
     @Override
     protected void onDestroy() {
